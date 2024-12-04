@@ -102,7 +102,7 @@ def tracksFromOPMD(ts, pt, ref_iteration,
                 f[f'tracks/{i_tr:d}/x'] = x
                 f[f'tracks/{i_tr:d}/y'] = y
                 if z_is_xi:
-                    f[f'tracks/{i_tr:d}/z'] = z + c * t
+                    f[f'tracks/{i_tr:d}/z'] = z + c * t[it_start:it_start+z.size] # Since the size of z may have changed, we need to truncate t accordingly
                 else:
                     f[f'tracks/{i_tr:d}/z'] = z
                 f[f'tracks/{i_tr:d}/ux'] = ux
