@@ -105,6 +105,7 @@ class SynchRad(Utilities):
                            nSnaps=1, sigma_particle=0,
                            weights_normalize=None,
                            file_spectrum=None,
+                           track_func=None,
                            verbose=True):
         """
         Main method to run the SR calculation.
@@ -165,6 +166,13 @@ class SynchRad(Utilities):
         file_spectrum : string
             Path and name to the file to which write the radiation data along with 
             the simulation configuration
+
+        track_func : callable (optional)
+            A function of the form `track_func(track)` where `track` contains 
+            the initial values of the track to be computed by the function.
+            This works over the elements in `particleTracks`, which in this case,
+            should contain only the initial values of the particles.
+            It enables a massive CPU memory saving.
         """
 
         self.Args['sigma_particle'] = self.dtype(sigma_particle)
@@ -257,6 +265,9 @@ class SynchRad(Utilities):
 
         for itr in calc_iterator:
             track = particleTracks[itr]
+ 
+            if track_func is not None:
+                track = track_func(track)
 
             if weights_normalize=='mean' or weights_normalize=='max':
                 track[6] /= weight_norm
@@ -266,6 +277,8 @@ class SynchRad(Utilities):
             self.total_weight += track[6]
             track = self._track_to_device(track)
             self._process_track(track, comp, nSnaps, it_range)
+
+            del track
 
         # receive and gather tracks from devices
         self._spectr_from_device(nSnaps)
